@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Task Planner</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <span class="logo">📋</span>
+        <h1 class="app-title">Daily Planner</h1>
+      </div>
+      <div class="header-right">
+        <div id="clock" class="clock"></div>
+        <div id="date-display" class="date-display"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Alert banner -->
+  <div id="alert-banner" class="alert-banner hidden" role="alert" aria-live="assertive">
+    <span class="alert-icon">🔔</span>
+    <span id="alert-message" class="alert-message"></span>
+    <button class="alert-dismiss" onclick="dismissAlertBanner()" aria-label="Dismiss alert">✕</button>
+  </div>
+
+  <main class="main">
+    <!-- Stats bar -->
+    <section class="stats-bar" aria-label="Task summary">
+      <div class="stat-card">
+        <span class="stat-number" id="stat-total">0</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat-card pending">
+        <span class="stat-number" id="stat-pending">0</span>
+        <span class="stat-label">Pending</span>
+      </div>
+      <div class="stat-card overdue">
+        <span class="stat-number" id="stat-overdue">0</span>
+        <span class="stat-label">Overdue</span>
+      </div>
+      <div class="stat-card done">
+        <span class="stat-number" id="stat-done">0</span>
+        <span class="stat-label">Done</span>
+      </div>
+    </section>
+
+    <div class="content-grid">
+      <!-- Add Task Panel -->
+      <aside class="panel add-panel">
+        <h2 class="panel-title">Add New Task</h2>
+        <form id="task-form" novalidate>
+          <div class="field">
+            <label for="task-title">Task Title <span class="required">*</span></label>
+            <input type="text" id="task-title" placeholder="e.g. Submit report" maxlength="100" required />
+          </div>
+          <div class="field">
+            <label for="task-description">Description</label>
+            <textarea id="task-description" rows="3" placeholder="Optional details…" maxlength="300"></textarea>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="task-date">Due Date <span class="required">*</span></label>
+              <input type="date" id="task-date" required />
+            </div>
+            <div class="field">
+              <label for="task-time">Due Time <span class="required">*</span></label>
+              <input type="time" id="task-time" required />
+            </div>
+          </div>
+          <div class="field">
+            <label for="task-priority">Priority</label>
+            <select id="task-priority">
+              <option value="high">🔴 High</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="low">🟢 Low</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="task-category">Category</label>
+            <select id="task-category">
+              <option value="work">💼 Work</option>
+              <option value="personal">🏠 Personal</option>
+              <option value="health">💪 Health</option>
+              <option value="finance">💰 Finance</option>
+              <option value="other">📌 Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="alert-minutes">Alert Before (minutes)</label>
+            <input type="number" id="alert-minutes" value="15" min="1" max="1440" />
+            <span class="field-hint">You'll be notified this many minutes before the deadline.</span>
+          </div>
+          <button type="submit" class="btn btn-primary" id="submit-btn">➕ Add Task</button>
+        </form>
+      </aside>
+
+      <!-- Task List Panel -->
+      <section class="panel tasks-panel">
+        <!-- Filter / search bar -->
+        <div class="tasks-header">
+          <h2 class="panel-title">My Tasks</h2>
+          <div class="tasks-toolbar">
+            <input type="search" id="search-input" placeholder="🔍 Search tasks…" aria-label="Search tasks" />
+            <select id="filter-status" aria-label="Filter by status">
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="overdue">Overdue</option>
+              <option value="done">Done</option>
+            </select>
+            <select id="filter-priority" aria-label="Filter by priority">
+              <option value="all">All Priorities</option>
+              <option value="high">🔴 High</option>
+              <option value="medium">🟡 Medium</option>
+              <option value="low">🟢 Low</option>
+            </select>
+            <button class="btn btn-ghost" id="clear-done-btn" title="Clear completed tasks">🗑 Clear Done</button>
+          </div>
+        </div>
+
+        <div id="task-list" class="task-list" role="list" aria-live="polite">
+          <p class="empty-state" id="empty-state">No tasks yet. Add one to get started! 🚀</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Edit Task Modal -->
+  <div id="edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <h2 id="modal-title" class="panel-title">Edit Task</h2>
+      <form id="edit-form" novalidate>
+        <input type="hidden" id="edit-id" />
+        <div class="field">
+          <label for="edit-title">Task Title <span class="required">*</span></label>
+          <input type="text" id="edit-title" maxlength="100" required />
+        </div>
+        <div class="field">
+          <label for="edit-description">Description</label>
+          <textarea id="edit-description" rows="3" maxlength="300"></textarea>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="edit-date">Due Date <span class="required">*</span></label>
+            <input type="date" id="edit-date" required />
+          </div>
+          <div class="field">
+            <label for="edit-time">Due Time <span class="required">*</span></label>
+            <input type="time" id="edit-time" required />
+          </div>
+        </div>
+        <div class="field">
+          <label for="edit-priority">Priority</label>
+          <select id="edit-priority">
+            <option value="high">🔴 High</option>
+            <option value="medium">🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="edit-category">Category</label>
+          <select id="edit-category">
+            <option value="work">💼 Work</option>
+            <option value="personal">🏠 Personal</option>
+            <option value="health">💪 Health</option>
+            <option value="finance">💰 Finance</option>
+            <option value="other">📌 Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="edit-alert-minutes">Alert Before (minutes)</label>
+          <input type="number" id="edit-alert-minutes" min="1" max="1440" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
