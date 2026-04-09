@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { generateId } from '@/lib/utils'
 
 export interface Task {
   id: string
@@ -75,7 +76,7 @@ export const useTaskStore = create<TaskStore>((set) => ({
         ...state.tasks,
         {
           ...task,
-          id: crypto.randomUUID(),
+          id: generateId(),
           createdAt: new Date().toISOString(),
         },
       ],

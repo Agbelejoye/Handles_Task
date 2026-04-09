@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { generateId } from '@/lib/utils'
 
 export interface Message {
   id: string
@@ -28,7 +29,7 @@ export const useChatStore = create<ChatStore>((set) => ({
         ...state.messages,
         {
           ...message,
-          id: crypto.randomUUID(),
+          id: generateId(),
           timestamp: new Date().toISOString(),
         },
       ],

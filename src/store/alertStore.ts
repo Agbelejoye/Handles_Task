@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { generateId } from '@/lib/utils'
 
 export interface Alert {
   id: string
@@ -26,7 +27,7 @@ export const useAlertStore = create<AlertStore>((set) => ({
   ],
   addAlert: (alert) =>
     set((state) => ({
-      alerts: [...state.alerts, { ...alert, id: crypto.randomUUID() }],
+      alerts: [...state.alerts, { ...alert, id: generateId() }],
     })),
   dismissAlert: (id) =>
     set((state) => ({
